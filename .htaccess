@@ -1,0 +1,6 @@
+ErrorDocument 403 https://mahjong.modaweb.kr
+ErrorDocument 404 https://mahjong.modaweb.kr
+
+RewriteEngine on
+RewriteCond %{HTTPS} !on
+RewriteRule ^(.*)$ https://%{HTTP_HOST}/$1 [R,L]
