@@ -1,58 +1,10 @@
 <?php
-	ob_start();
-	session_start();
-
-	// GRANT ALL PRIVILEGES ON `snowfam_latest`.`mahjong_pageview` TO app_mahjong@localhost;
-	$con = mysqli_connect('localhost', 'app_mahjong', 'app_mahjong');
-	mysqli_select_db($con, 'snowfam_latest');
-	$con->query('SET NAMES utf8');
-	$con->query('SET CHARACTER SET utf8');
-	$con->query("SET SESSION sql_mode = 'NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION'");
-
-	$cf['time_ymdhis'] = date('Y-m-d H:i:s', time());
-	$cf['ctime_ymdhis'] = date('Y-m-d H:i:s', time());
-	$cf['ctime'] = time();
-	
-	$ua = $_SERVER['HTTP_USER_AGENT'];
-	$ua = str_replace(chr(92), chr(92).chr(92), $ua); // \
-	$ua = str_replace(chr(39), '&#039;', $ua); // '
-	$cf['ua'] = $ua;
-	$cf['mid'] = 0;
-	$cf['document_url'] = $_SERVER['REQUEST_SCHEME'].'://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];
-
-	$SALT = 'dd8f1b35463aab9426d39f457417209b';
-	$SALT2 = '7c317a007d9ffa750a97779ecbfb7fb4';
-	function enchash($kx) {
-		return md5(sha1($SALT).sha1($SALT2).$kx);
-	}
-	
-	$request_url = $cf['document_url'];
-
-	$cf['uip'] = $_SERVER['REMOTE_ADDR'];
-	if (!$_COOKIE['sess_id']) {
-		setcookie('sess_id', enchash(time().$cf['uip']), time() + 60*60*24*365, '/');
-		$_COOKIE['sess_id'] = enchash(time().$cf['uip']);
-	}
-
-	$_SERVER['HTTP_REFERER'] = str_replace(chr(92), chr(92).chr(92), $_SERVER['HTTP_REFERER']); // \
-	$_SERVER['HTTP_REFERER'] = str_replace(chr(39), '&#039;', $_SERVER['HTTP_REFERER']); // '
-
 	require_once($_SERVER['DOCUMENT_ROOT'].'/lib/BrowserDetection.php');
 
 	$BrowserDetection = new foroco\BrowserDetection();
 	$BrowserDetectionRet['os'] = $BrowserDetection->getOS($ua)['os_name'].' '.$BrowserDetection->getOS($ua)['os_version'];
 	$BrowserDetectionRet['browser'] = $BrowserDetection->getBrowser($ua)['browser_name'].' '.$BrowserDetection->getBrowser($ua)['browser_version'];
 	$BrowserDetectionRet['device'] = $BrowserDetection->getDevice($ua)['device_type'];
-
-	$q = "INSERT INTO `mahjong_pageview` SET `sessid` = '$_COOKIE[sess_id]',
-											`ip` = '$_SERVER[REMOTE_ADDR]',
-											`browser` = '$BrowserDetectionRet[browser]',
-											`os` = '$BrowserDetectionRet[os]',
-											`ref` = '$_SERVER[HTTP_REFERER]',
-											`url` = '$request_url',
-											`useragent` = '$ua',
-											`datetime` = '$cf[time_ymdhis]'";
-	$con->query($q);
 ?>
 <!DOCTYPE HTML>
 <html lang="ko" class="light">
